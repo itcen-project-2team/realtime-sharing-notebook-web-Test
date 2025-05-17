@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     DOCKERHUB_CREDENTIALS = 'dockerhub-cred'
-    IMAGE_NAME = 'visionn7111/nginx-test'
+    IMAGE_NAME = 'visionn7111/nginx-Web-test'
     SERVER_IP = '13.124.177.239'
   }
 
@@ -14,9 +14,18 @@ pipeline {
       }
     }
 
+    stage('Generate .env') {
+      steps {
+        writeFile file: '.env', text: '''
+VITE_BACKEND_URL=http://13.124.177.239:8080
+'''
+      }
+    }
+
     stage('Docker Build') {
       steps {
-        sh 'docker build --platform linux/amd64 -t $IMAGE_NAME .'
+        // --platform 옵션 제거함 (ARM에서 amd64 빌드 시 에러 방지)
+        sh 'docker build -t $IMAGE_NAME .'
       }
     }
 
