@@ -4,7 +4,7 @@ pipeline {
   environment {
     DOCKERHUB_CREDENTIALS = 'dockerhub-cred'
     IMAGE_NAME = 'visionn7111/nginx-web-test'
-    SERVER_IP = '13.124.177.239'
+    SERVER_IP = '3.39.64.123'
   }
 
   stages {
@@ -17,33 +17,29 @@ pipeline {
     stage('Generate .env') {
       steps {
         writeFile file: '.env', text: '''
-VITE_BACKEND_URL=http://13.124.177.239:8080
+VITE_BACKEND_URL=http://localhost:8080
 '''
       }
     }
 
-    stage('Enable buildx & QEMU') {
+    stage('Docker Build (ARM local)') {
       steps {
-        sh '''
-          # QEMU 실행 환경 등록 (ARM에서도 작동하게)
-          docker run --privileged --rm tonistiigi/binfmt --install all
-
-          # buildx 빌더 생성 (중복 방지)
-          docker buildx inspect multiarch-builder || docker buildx create --name multiarch-builder --use
-          docker buildx use multiarch-builder
-          docker buildx inspect --bootstrap
-        '''
+        sh 'docker build -t $IMAGE_NAME .'
       }
     }
 
-    stage('Docker Build for amd64') {
+    stage('Push to Docker Hub') {
       steps {
-        sh '''
-          docker buildx build \
-            --platform linux/amd64 \
-            -t $IMAGE_NAME . \
-            --push
-        '''
+        withCredentials([usernamePassword(
+          credentialsId: "${DOCKERHUB_CREDENTIALS}",
+          usernameVariable: 'DOCKER_USER',
+          passwordVariable: 'DOCKER_PASS'
+        )]) {
+          sh '''
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+            docker push $IMAGE_NAME
+          '''
+        }
       }
     }
 
