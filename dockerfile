@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # .env 복사 (중요)
-COPY .env ./
+# COPY .env ./
 
 # 나머지 소스 코드 복사
 COPY . .
