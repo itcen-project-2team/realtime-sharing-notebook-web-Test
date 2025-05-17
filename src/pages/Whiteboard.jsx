@@ -46,9 +46,11 @@ const Whiteboard = () => {
     const ctx = canvas.getContext('2d');
     ctx.lineCap = 'round';
     ctxRef.current = ctx;
-    const socket = new WebSocket(
-      `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}${import.meta.env.VITE_WS_BASE_URL}?roomId=${roomId}`
-    );
+    //const socket = new WebSocket(
+    //  `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}${import.meta.env.VITE_WS_BASE_URL}?roomId=${roomId}`
+    // );
+    const socket = new WebSocket(`${import.meta.env.VITE_WS_URL}?roomId=${roomId}`);
+
     socketRef.current = socket;
 
     socket.onopen = () => console.log('✅ WebSocket 연결됨');
