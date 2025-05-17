@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     DOCKERHUB_CREDENTIALS = 'dockerhub-cred'
-    IMAGE_NAME = 'visionn7111/nginx-Web-test'
+    IMAGE_NAME = 'visionn7111/nginx-web-test'
     SERVER_IP = '13.124.177.239'
   }
 
