@@ -22,25 +22,18 @@ VITE_BACKEND_URL=http://13.124.177.239:8080
       }
     }
 
-    stage('Docker Build') {
+    stage('Enable buildx') {
       steps {
-        // --platform 옵션 제거함 (ARM에서 amd64 빌드 시 에러 방지)
-        sh 'docker build -t $IMAGE_NAME .'
+        sh '''
+          docker buildx create --name multiarch-builder --use || docker buildx use multiarch-builder
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        '''
       }
     }
 
-    stage('Push to Docker Hub') {
+    stage('Docker Build for amd64') {
       steps {
-        withCredentials([usernamePassword(
-          credentialsId: "${DOCKERHUB_CREDENTIALS}",
-          usernameVariable: 'DOCKER_USER',
-          passwordVariable: 'DOCKER_PASS'
-        )]) {
-          sh '''
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            docker push $IMAGE_NAME
-          '''
-        }
+        sh 'docker buildx build --platform linux/amd64 -t $IMAGE_NAME . --push'
       }
     }
 
