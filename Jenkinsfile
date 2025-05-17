@@ -22,18 +22,28 @@ VITE_BACKEND_URL=http://13.124.177.239:8080
       }
     }
 
-    stage('Enable buildx') {
+    stage('Enable buildx & QEMU') {
       steps {
         sh '''
-          docker buildx create --name multiarch-builder --use || docker buildx use multiarch-builder
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          # QEMU 실행 환경 등록 (ARM에서도 작동하게)
+          docker run --privileged --rm tonistiigi/binfmt --install all
+
+          # buildx 빌더 생성 (중복 방지)
+          docker buildx inspect multiarch-builder || docker buildx create --name multiarch-builder --use
+          docker buildx use multiarch-builder
+          docker buildx inspect --bootstrap
         '''
       }
     }
 
     stage('Docker Build for amd64') {
       steps {
-        sh 'docker buildx build --platform linux/amd64 -t $IMAGE_NAME . --push'
+        sh '''
+          docker buildx build \
+            --platform linux/amd64 \
+            -t $IMAGE_NAME . \
+            --push
+        '''
       }
     }
 
