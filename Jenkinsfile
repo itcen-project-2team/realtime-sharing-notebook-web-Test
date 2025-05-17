@@ -10,7 +10,7 @@ pipeline {
   stages {
     stage('Clone') {
       steps {
-        git url: 'https://github.com/itcen-project-2team/ci-cd-test-repo', branch: 'main'
+        git url: 'https://github.com/itcen-project-2team/realtime-sharing-notebook-web-Test', branch: 'main'
       }
     }
 
